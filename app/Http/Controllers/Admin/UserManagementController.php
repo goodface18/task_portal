@@ -12,13 +12,30 @@ use Illuminate\View\View;
 
 class UserManagementController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $users = User::whereIn('role', [User::ROLE_CLIENT, User::ROLE_EMPLOYEE])
-            ->latest()
-            ->paginate(15);
+        $query = User::whereIn('role', [User::ROLE_CLIENT, User::ROLE_EMPLOYEE]);
 
-        return view('admin.users.index', compact('users'));
+        if (in_array($request->query('role'), [User::ROLE_CLIENT, User::ROLE_EMPLOYEE], true)) {
+            $query->where('role', $request->query('role'));
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->query('search');
+            $query->where(function ($builder) use ($search) {
+                $builder->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%');
+            });
+        }
+
+        $users = $query->latest()->paginate(15)->withQueryString();
+        $accountCounts = [
+            'all' => User::whereIn('role', [User::ROLE_CLIENT, User::ROLE_EMPLOYEE])->count(),
+            'client' => User::where('role', User::ROLE_CLIENT)->count(),
+            'employee' => User::where('role', User::ROLE_EMPLOYEE)->count(),
+        ];
+
+        return view('admin.users.index', compact('users', 'accountCounts'));
     }
 
     public function create(): View

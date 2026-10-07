@@ -95,6 +95,24 @@ class UserRolesTest extends TestCase
         }
     }
 
+    public function test_admin_account_pages_render_the_dashboard_theme(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertSee('Accounts,')
+            ->assertSee('Client accounts')
+            ->assertSee('Employee accounts');
+
+        $this->get(route('admin.users.create'))
+            ->assertOk()
+            ->assertSee('Create an')
+            ->assertSee('Account information')
+            ->assertSee('Client · Client portal');
+    }
+
     public function test_non_admin_cannot_create_accounts(): void
     {
         $employee = User::factory()->create(['role' => User::ROLE_EMPLOYEE]);
