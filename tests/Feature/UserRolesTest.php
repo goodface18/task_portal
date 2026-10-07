@@ -58,6 +58,22 @@ class UserRolesTest extends TestCase
             ->assertDontSee('Your engagement');
     }
 
+    public function test_admin_can_view_both_client_and_employee_dashboards(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)
+            ->get(route('client.dashboard'))
+            ->assertOk()
+            ->assertSee('Your engagement')
+            ->assertSee('Team Hub');
+
+        $this->get(route('employee.dashboard'))
+            ->assertOk()
+            ->assertSee('Team tasks')
+            ->assertSee('Client Portal');
+    }
+
     public function test_admin_can_create_client_or_employee_accounts(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);

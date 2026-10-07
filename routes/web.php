@@ -24,15 +24,17 @@ Route::get('/dashboard', function () {
         return redirect()->route('admin.users.index');
     }
 
-    return view('dashboard');
+    $portal = auth()->user()->hasRole('client') ? 'client' : 'employee';
+
+    return view('dashboard', compact('portal'));
 })->middleware('auth')->name('dashboard');
 
-Route::middleware(['auth', 'role:client'])->get('/client/dashboard', function () {
-    return view('dashboard');
+Route::middleware(['auth', 'role:client,admin'])->get('/client/dashboard', function () {
+    return view('dashboard', ['portal' => 'client']);
 })->name('client.dashboard');
 
-Route::middleware(['auth', 'role:employee'])->get('/employee/dashboard', function () {
-    return view('dashboard');
+Route::middleware(['auth', 'role:employee,admin'])->get('/employee/dashboard', function () {
+    return view('dashboard', ['portal' => 'employee']);
 })->name('employee.dashboard');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

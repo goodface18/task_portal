@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ auth()->user()->hasRole('client') ? 'Client Portal' : 'Team Hub' }} · onsoftarch</title>
+    <title>{{ $portal === 'client' ? 'Client Portal' : 'Team Hub' }} · onsoftarch</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root{--green:#5cc820;--black:#0d0d0d;--surface:#131313;--off:#f0efe9;--white:#fff;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--muted:rgba(255,255,255,.52);--dim:rgba(255,255,255,.28);--red:#f2495c;--blue:#5794f2;--purple:#b877d9;--orange:#ff9830;--amber:#fade2a;--mono:'DM Mono',monospace;--serif:'DM Serif Display',serif;--sans:'Instrument Sans',sans-serif}
@@ -22,13 +22,20 @@
 </head>
 <body>
     <header class="portal-header">
-        <div class="portal-brand"><div class="portal-logo">onsoft<span>arch</span></div><div class="portal-divider"></div><div class="portal-caption">{{ auth()->user()->hasRole('client') ? 'Banco di Caribe · Client Portal' : 'Banco di Caribe · Team Hub' }}</div></div>
-        <div class="portal-user"><span class="portal-user-name">{{ auth()->user()->name }}</span><a class="portal-link" href="{{ route('profile.edit') }}">Profile</a><form method="POST" action="{{ route('logout') }}">@csrf<button class="portal-logout" type="submit">Sign out</button></form></div>
+        <div class="portal-brand"><div class="portal-logo">onsoft<span>arch</span></div><div class="portal-divider"></div><div class="portal-caption">{{ $portal === 'client' ? 'Banco di Caribe · Client Portal' : 'Banco di Caribe · Team Hub' }}</div></div>
+        <div class="portal-user">
+            @if (auth()->user()->hasRole('admin'))
+                <a class="portal-link" href="{{ route('client.dashboard') }}">Client Portal</a>
+                <a class="portal-link" href="{{ route('employee.dashboard') }}">Team Hub</a>
+                <a class="portal-link" href="{{ route('admin.users.index') }}">Manage accounts</a>
+            @endif
+            <span class="portal-user-name">{{ auth()->user()->name }}</span><a class="portal-link" href="{{ route('profile.edit') }}">Profile</a><form method="POST" action="{{ route('logout') }}">@csrf<button class="portal-logout" type="submit">Sign out</button></form>
+        </div>
     </header>
     <main class="portal-main">
-        @if (auth()->user()->hasRole('client'))
+        @if ($portal === 'client')
             @include('client.dashboard')
-        @elseif (auth()->user()->hasRole('employee'))
+        @elseif ($portal === 'employee')
             @include('employee.dashboard')
         @else
             <div class="portal-card">This dashboard is not available for your account type.</div>
