@@ -1,17 +1,40 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    {{ __("You're logged in!") }}
-                </div>
-            </div>
-        </div>
-    </div>
-</x-app-layout>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ auth()->user()->hasRole('client') ? 'Client Portal' : 'Team Hub' }} · onsoftarch</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--green:#5cc820;--black:#0d0d0d;--surface:#131313;--off:#f0efe9;--white:#fff;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--muted:rgba(255,255,255,.52);--dim:rgba(255,255,255,.28);--red:#f2495c;--blue:#5794f2;--purple:#b877d9;--orange:#ff9830;--amber:#fade2a;--mono:'DM Mono',monospace;--serif:'DM Serif Display',serif;--sans:'Instrument Sans',sans-serif}
+        *{box-sizing:border-box}body{margin:0;background:var(--black);color:var(--off);font:13px var(--sans);min-height:100vh}body:before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(92,200,32,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(92,200,32,.025) 1px,transparent 1px);background-size:32px 32px}
+        .portal-header{position:sticky;top:0;z-index:10;height:60px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(13,13,13,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}.portal-brand{display:flex;align-items:center;gap:12px}.portal-logo{font-weight:600;font-size:1.05rem;color:var(--white)}.portal-logo span{color:var(--green)}.portal-divider{height:22px;width:1px;background:var(--border2)}.portal-caption{font: .6rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.portal-user{display:flex;align-items:center;gap:14px;color:var(--muted);font: .65rem var(--mono)}.portal-user form{margin:0}.portal-link,.portal-logout{color:var(--muted);font: .63rem var(--mono);text-decoration:none;text-transform:uppercase;letter-spacing:.06em;background:none;border:1px solid var(--border2);border-radius:3px;padding:7px 11px;cursor:pointer}.portal-link:hover{color:var(--green);border-color:rgba(92,200,32,.4)}.portal-logout:hover{color:var(--red);border-color:rgba(242,73,92,.4)}
+        .portal-main{position:relative;z-index:1;max-width:1500px;margin:0 auto;padding:30px 24px 50px}.portal-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:24px}.portal-eyebrow{font: .61rem var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:8px}.portal-heading h1{font:2.15rem/1.08 var(--serif);color:var(--white);margin:0 0 7px}.portal-heading h1 em{font-weight:400;color:var(--green)}.portal-heading p{font-size:.92rem;color:var(--muted);line-height:1.55;max-width:720px;margin:0}.portal-badge{display:flex;align-items:center;gap:8px;color:var(--green);font: .59rem var(--mono);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}.portal-badge>span:first-child{width:6px;height:6px;border-radius:50%;background:var(--green)}
+        .portal-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:22px 0 27px}.portal-stat{position:relative;overflow:hidden;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:4px}.portal-stat:before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green)}.portal-stat.blue:before{background:var(--blue)}.portal-stat.purple:before{background:var(--purple)}.portal-stat.red:before{background:var(--red)}.portal-stat span{display:block;font:.58rem var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}.portal-stat strong{font:1.8rem/1 var(--serif);color:var(--green)}.portal-stat.blue strong{color:var(--blue)}.portal-stat.purple strong{color:var(--purple)}.portal-stat.red strong{color:var(--red)}
+        .portal-section{margin-top:34px}.portal-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:13px}.portal-section-head h2{font:1.35rem var(--serif);color:var(--white);margin:0}.portal-section-head .portal-eyebrow{margin-bottom:5px}.portal-actions{display:flex;gap:8px}.portal-btn{font:.62rem var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--border2);border-radius:3px;padding:8px 12px;cursor:pointer}.portal-btn:hover{color:var(--off);border-color:rgba(255,255,255,.3)}.portal-btn.primary{background:var(--green);border-color:var(--green);color:var(--black);font-weight:500}.portal-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}.portal-filters{display:flex;align-items:center;gap:3px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:4px}.portal-filters button{font:.58rem var(--mono);letter-spacing:.03em;text-transform:uppercase;color:var(--muted);background:none;border:0;border-radius:2px;padding:7px 10px;cursor:pointer}.portal-filters button.active{background:rgba(92,200,32,.14);color:var(--green)}.portal-search{width:min(260px,100%);background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:9px 11px;color:var(--off);font:.68rem var(--mono);outline:none}.portal-search:focus{border-color:rgba(92,200,32,.55)}
+        .portal-table-wrap{overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:4px}.portal-table{width:100%;border-collapse:collapse;min-width:780px}.portal-table th{padding:11px 13px;text-align:left;background:#101010;border-bottom:1px solid var(--border2);color:var(--dim);font:.56rem var(--mono);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}.portal-table td{padding:12px 13px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top}.portal-table tr:last-child td{border-bottom:0}.portal-table td strong{display:block;color:var(--white);font-size:.81rem;margin-bottom:4px}.portal-latest{display:block;color:var(--dim);font-size:.69rem;line-height:1.4}.portal-pill{display:inline-block;border-radius:3px;padding:4px 8px;font:.57rem var(--mono);text-transform:uppercase;white-space:nowrap;background:rgba(255,255,255,.06);color:var(--muted)}.status-in-progress{background:rgba(87,148,242,.14);color:var(--blue)}.status-in-review{background:rgba(184,119,217,.14);color:var(--purple)}.status-blocked{background:rgba(242,73,92,.14);color:var(--red)}.status-done{background:rgba(92,200,32,.14);color:var(--green)}.priority-medium{background:rgba(250,222,42,.13);color:var(--amber)}.priority-high{background:rgba(255,152,48,.14);color:var(--orange)}.priority-urgent{background:rgba(242,73,92,.15);color:var(--red)}.portal-empty{padding:30px;text-align:center;color:var(--dim);font:.67rem var(--mono);text-transform:uppercase;letter-spacing:.08em}.portal-two-col{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:start}.portal-contact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.portal-card{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px 16px}.portal-card strong{font-size:.82rem;color:var(--white)}.portal-card span,.portal-card small{color:var(--muted);font-size:.72rem}.portal-card a{color:var(--green);font-size:.7rem;text-decoration:none;word-break:break-word}.portal-card a:hover{text-decoration:underline}.portal-meetings{display:grid;gap:10px}.portal-note{color:var(--muted);font-size:.78rem}.portal-callout{margin:0 0 10px;padding:10px 12px;border-left:2px solid var(--amber);background:rgba(250,222,42,.06);color:var(--muted);font:.65rem var(--mono)}
+        .employee-table{min-width:1120px}.employee-table td{padding:5px}.employee-table input,.employee-table textarea,.employee-table select{width:100%;min-width:86px;resize:vertical;background:transparent;color:var(--off);border:1px solid transparent;border-radius:3px;padding:7px;font: .74rem var(--sans);outline:none}.employee-table textarea{min-width:170px;min-height:34px}.employee-table input:focus,.employee-table textarea:focus,.employee-table select:focus{border-color:rgba(92,200,32,.5);background:#0d0d0d}.employee-table select option{background:#131313}.portal-delete{border:0;background:none;color:var(--dim);font-size:1.1rem;cursor:pointer}.portal-delete:hover{color:var(--red)}
+        .portal-footer{text-align:center;margin-top:38px;padding-top:18px;border-top:1px solid var(--border);color:var(--dim);font:.55rem var(--mono);letter-spacing:.1em;text-transform:uppercase}.portal-footer span{color:var(--green)}
+        @media(max-width:900px){.portal-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.portal-two-col{grid-template-columns:1fr}.portal-heading{align-items:flex-start;flex-direction:column}.portal-toolbar{align-items:stretch;flex-direction:column}.portal-search{width:100%}}
+        @media(max-width:600px){.portal-header{padding:0 14px}.portal-main{padding:23px 14px 40px}.portal-caption,.portal-user-name{display:none}.portal-summary{gap:7px}.portal-stat{padding:12px}.portal-contact-grid{grid-template-columns:1fr}.portal-filters{overflow:auto;flex-wrap:nowrap}.portal-filters button{white-space:nowrap}.portal-heading h1{font-size:1.8rem}.portal-section-head{align-items:flex-start;flex-direction:column}}
+    </style>
+</head>
+<body>
+    <header class="portal-header">
+        <div class="portal-brand"><div class="portal-logo">onsoft<span>arch</span></div><div class="portal-divider"></div><div class="portal-caption">{{ auth()->user()->hasRole('client') ? 'Banco di Caribe · Client Portal' : 'Banco di Caribe · Team Hub' }}</div></div>
+        <div class="portal-user"><span class="portal-user-name">{{ auth()->user()->name }}</span><a class="portal-link" href="{{ route('profile.edit') }}">Profile</a><form method="POST" action="{{ route('logout') }}">@csrf<button class="portal-logout" type="submit">Sign out</button></form></div>
+    </header>
+    <main class="portal-main">
+        @if (auth()->user()->hasRole('client'))
+            @include('client.dashboard')
+        @elseif (auth()->user()->hasRole('employee'))
+            @include('employee.dashboard')
+        @else
+            <div class="portal-card">This dashboard is not available for your account type.</div>
+        @endif
+        <footer class="portal-footer">Banco di Caribe · <span>onsoftarch</span> · Confidential</footer>
+    </main>
+    @stack('scripts')
+</body>
+</html>

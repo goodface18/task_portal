@@ -37,6 +37,27 @@ class UserRolesTest extends TestCase
         $this->actingAs($client)->get(route('admin.users.index'))->assertForbidden();
     }
 
+    public function test_client_and_employee_receive_their_own_dashboard_content(): void
+    {
+        $client = User::factory()->create(['role' => User::ROLE_CLIENT]);
+        $this->actingAs($client)
+            ->get(route('client.dashboard'))
+            ->assertOk()
+            ->assertSee('Your engagement')
+            ->assertSee('Project status')
+            ->assertDontSee('Team tasks');
+
+        auth()->logout();
+
+        $employee = User::factory()->create(['role' => User::ROLE_EMPLOYEE]);
+        $this->actingAs($employee)
+            ->get(route('employee.dashboard'))
+            ->assertOk()
+            ->assertSee('Everything the')
+            ->assertSee('Team tasks')
+            ->assertDontSee('Your engagement');
+    }
+
     public function test_admin_can_create_client_or_employee_accounts(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);

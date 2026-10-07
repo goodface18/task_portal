@@ -20,15 +20,19 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return redirect()->route(auth()->user()->dashboardRoute());
+    if (auth()->user()->hasRole('admin')) {
+        return redirect()->route('admin.users.index');
+    }
+
+    return view('dashboard');
 })->middleware('auth')->name('dashboard');
 
 Route::middleware(['auth', 'role:client'])->get('/client/dashboard', function () {
-    return view('client.dashboard');
+    return view('dashboard');
 })->name('client.dashboard');
 
 Route::middleware(['auth', 'role:employee'])->get('/employee/dashboard', function () {
-    return view('employee.dashboard');
+    return view('dashboard');
 })->name('employee.dashboard');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
