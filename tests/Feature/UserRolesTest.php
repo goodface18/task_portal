@@ -113,6 +113,26 @@ class UserRolesTest extends TestCase
             ->assertSee('Client · Client portal');
     }
 
+    public function test_admin_account_pagination_uses_compact_navigation(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        User::factory()->count(17)->create(['role' => User::ROLE_CLIENT]);
+        $total = User::whereIn('role', [User::ROLE_CLIENT, User::ROLE_EMPLOYEE])->count();
+        $secondPageLastItem = min(30, $total);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertSee("Showing 1–15 of {$total} accounts")
+            ->assertSee('aria-label="Next page"', false)
+            ->assertSee('aria-label="Go to page 2"', false);
+
+        $this->get(route('admin.users.index', ['page' => 2]))
+            ->assertOk()
+            ->assertSee("Showing 16–{$secondPageLastItem} of {$total} accounts")
+            ->assertSee('aria-label="Previous page"', false);
+    }
+
     public function test_non_admin_cannot_create_accounts(): void
     {
         $employee = User::factory()->create(['role' => User::ROLE_EMPLOYEE]);
