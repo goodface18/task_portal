@@ -44,6 +44,7 @@
   .boot-line.show { opacity: 1; }
   .boot-line .ok { color: var(--green); }
   .boot-line .pr { color: var(--green); }
+  .boot-line .err { color: var(--red); }
 
   .form-area { margin-top: 1.25rem; opacity: 0; max-height: 0; overflow: hidden; transition: opacity 0.5s ease, max-height 0.6s ease; }
   .form-area.show { opacity: 1; max-height: 560px; }
@@ -117,6 +118,9 @@
         <div class="boot-line" data-i="1"><span class="ok">&#10003;</span> TLS handshake complete</div>
         <div class="boot-line" data-i="2"><span class="ok">&#10003;</span> BDC Stratus node reached</div>
         <div class="boot-line" data-i="3"><span class="pr">&gt;</span> awaiting operator credentials</div>
+        @if ($errors->has('email') || $errors->has('password'))
+          <div class="boot-line error" data-i="4"><span class="err">&#10007;</span> ACCESS DENIED · {{ $errors->first('email') ?: $errors->first('password') }}</div>
+        @endif
       </div>
 
       <!-- login form -->
@@ -127,14 +131,14 @@
             <label for="email">{{__('Email')}}</label>
             <div class="input-wrap">
                 <span class="prompt">$</span>
-                <input id="email" type="email" autocomplete="email" name="email" value="{{old('email')}}" placeholder="enter email address" spellcheck="false" required autofocus>
+                <input id="email" type="email" autocomplete="email" name="email" value="{{ old('email') }}" placeholder="enter email address" spellcheck="false" required autofocus>
             </div>
             </div>
             <div class="field">
             <label for="pass">{{__('Password')}}</label>
             <div class="input-wrap">
                 <span class="prompt">$</span>
-                <input id="passsword" type="password" autocomplete="current-password" name="password" placeholder="enter password" spellcheck="false" required>
+                <input id="password" type="password" autocomplete="current-password" name="password" placeholder="enter password" spellcheck="false" required>
             </div>
             </div>
             <div class="form-options">
@@ -146,8 +150,8 @@
                 <a class="forgot-link" href="{{ route('password.request') }}">{{ __('Forgot password?') }}</a>
               @endif
             </div>
-            <button class="login-btn" id="login-btn">&#9654;&nbsp; Authenticate</button>
-            <div class="msg" id="msg"></div>
+            <button class="login-btn" id="login-btn" type="submit">&#9654;&nbsp; Authenticate</button>
+            <div class="msg{{ $errors->any() ? ' error' : '' }}" id="msg" role="alert">{{ $errors->first('email') ?: $errors->first('password') }}</div>
         </div>
       </form>  
 
@@ -182,82 +186,26 @@
 
   // ---- boot sequence ----
   var bootLines = document.querySelectorAll('.boot-line');
-  var delays = [300, 900, 1350, 1800];
-  bootLines.forEach(function(l, i){
+  var delays = [300, 900, 1350, 1800, 2250];
+  bootLines.forEach(function(line, index){
     setTimeout(function(){
-      l.classList.add('show');
-      if (i === 0) { setTimeout(function(){ var c=document.getElementById('boot-cursor'); if(c) c.style.display='none'; }, 550); }
-      if (i === bootLines.length - 1) {
-        setTimeout(function(){ document.getElementById('form-area').classList.add('show'); document.getElementById('user').focus(); }, 350);
+      line.classList.add('show');
+      if (index === 0) {
+        setTimeout(function(){
+          var cursor = document.getElementById('boot-cursor');
+          if (cursor) cursor.style.display = 'none';
+        }, 550);
       }
-    }, delays[i]);
+      if (index === bootLines.length - 1) {
+        setTimeout(function(){
+          document.getElementById('form-area').classList.add('show');
+          var email = document.getElementById('email');
+          var password = document.getElementById('password');
+          (password && document.querySelector('.boot-line.error') ? password : email).focus();
+        }, 350);
+      }
+    }, delays[index] || delays[delays.length - 1]);
   });
-
-  // ---- auth ----
-  var VALID_USER = 'BDC';
-  var VALID_PASS = 'BDC';
-
-  function attempt() {
-    var u = document.getElementById('user').value.trim();
-    var p = document.getElementById('pass').value;
-    var msg = document.getElementById('msg');
-    var btn = document.getElementById('login-btn');
-
-    if (!u || !p) { msg.className = 'msg error'; msg.textContent = '** LOGIN-ID and PASSWORD required'; return; }
-
-    btn.disabled = true;
-    msg.className = 'msg';
-    msg.textContent = 'verifying credentials...';
-
-    setTimeout(function(){
-      if (u.toUpperCase() === VALID_USER && p.toUpperCase() === VALID_PASS) {
-        msg.textContent = '';
-        document.getElementById('form-area').style.display = 'none';
-        document.getElementById('boot').style.display = 'none';
-        var s = document.getElementById('auth-success');
-        s.classList.add('show');
-        var lines = [
-          '> AUTHENTICATE',
-          '  \u2713 credentials accepted',
-          '  \u2713 operator BDC verified',
-          '  \u2713 session established',
-          '',
-          '  Loading BDC Stratus dashboard...'
-        ];
-        typeLines(lines, function(){
-          // redirect to the appropriate dashboard based on viewport
-          var isMobile = window.matchMedia('(max-width: 768px)').matches;
-          var target = isMobile ? 'onsoftarch_master_dashboard_mobile.html' : 'onsoftarch_master_dashboard_desktop.html';
-          setTimeout(function(){ window.location.href = target; }, 700);
-        });
-      } else {
-        btn.disabled = false;
-        msg.className = 'msg error';
-        msg.textContent = '** ACCESS DENIED \u00b7 invalid login or password';
-        // shake
-        var t = document.querySelector('.terminal');
-        t.style.animation = 'none'; void t.offsetWidth; t.style.animation = 'shake 0.4s';
-      }
-    }, 850);
-  }
-
-  function typeLines(lines, done) {
-    var c = document.getElementById('success-lines'); var i=0;
-    (function next(){
-      if (i >= lines.length) { if (done) done(); return; }
-      var d = document.createElement('div'); d.textContent = lines[i]; c.appendChild(d); i++;
-      setTimeout(next, 300);
-    })();
-  }
-
-  document.getElementById('login-btn').addEventListener('click', attempt);
-  document.getElementById('pass').addEventListener('keydown', function(e){ if (e.key === 'Enter') attempt(); });
-  document.getElementById('user').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('pass').focus(); });
-
-  // shake keyframes injected
-  var st = document.createElement('style');
-  st.textContent = '@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }';
-  document.head.appendChild(st);
 </script>
 </body>
 </html>

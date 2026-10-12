@@ -34,12 +34,18 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->post('/login', [
+        $response = $this->post('/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
 
         $this->assertGuest();
+        $response->assertSessionHasErrors('email');
+
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('ACCESS DENIED')
+            ->assertSee(__('auth.failed'));
     }
 
     public function test_users_can_logout(): void
