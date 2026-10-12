@@ -44,8 +44,8 @@ class UserRolesTest extends TestCase
             ->get(route('client.dashboard'))
             ->assertOk()
             ->assertSee('Your engagement')
-            ->assertSee('Project status')
-            ->assertDontSee('Team tasks');
+            ->assertSee('Project Status')
+            ->assertDontSee('Team Contacts');
 
         auth()->logout();
 
@@ -54,7 +54,8 @@ class UserRolesTest extends TestCase
             ->get(route('employee.dashboard'))
             ->assertOk()
             ->assertSee('Everything the')
-            ->assertSee('Team tasks')
+            ->assertSee('Team Contacts')
+            ->assertSee('Key Resources')
             ->assertDontSee('Your engagement');
     }
 
@@ -70,7 +71,7 @@ class UserRolesTest extends TestCase
 
         $this->get(route('employee.dashboard'))
             ->assertOk()
-            ->assertSee('Team tasks')
+            ->assertSee('Team Contacts')
             ->assertSee('Client Portal');
     }
 

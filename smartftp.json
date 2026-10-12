@@ -1,0 +1,21 @@
+{
+  "name": "task_portal",
+  "host": "onsoftarch.support",
+  "protocol": "ftp",
+  "port": 21,
+  "username": "onon1308_ftp@onsoftarch.support",
+  "password": "2HZB2cr&1MljHYy1",
+  "remotePath": "/public_html/",
+  "uploadOnSave": true,
+  "useTempFile": false,
+  "openSsh": false,
+  "watcher": {
+    "files": "**/*",
+    "autoUpload": true,
+    "autoDelete": false,
+    "ignoreCreate": false,
+    "ignoreUpdate": false,
+    "ignoreDelete": true
+  },
+  "ignore": []
+}
